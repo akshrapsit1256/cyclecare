@@ -1,54 +1,49 @@
-# CycleCare — Personal Menstrual Wellness Companion
+# CycleCare — a local cycle companion
 
-> **Built for the DEV / Hacktoberfest 2026 "Build for a Friend" Challenge**  
-> *Privacy-first, open-source AI powered menstrual cycle tracker and holistic lifestyle companion.*
+> **Built for the DEV / Hacktoberfest 2026 "Build for a Friend" challenge. The friend I built it for is me.**
+> *A small, local menstrual-cycle tracker with wellness and meal suggestions from an open-weight AI model running on my own laptop.*
 
 ---
 
 ## 🌸 About CycleCare
 
-**CycleCare** is a clean, comforting web application designed to help women track their menstrual cycle rhythms, log daily symptoms, and receive personalized, non-medical self-care, hydration, and phase-aligned meal suggestions powered by **local, open-source AI (Ollama + Gemma)**.
+**CycleCare** is a small web app I built for myself to track my menstrual cycle, log daily symptoms, and get general self-care, hydration, and meal ideas from a local open-weight AI model (Gemma, run through Ollama). Everything runs on my own laptop, with no account and no cloud service.
 
 ---
 
 ## 💡 The Problem
 
-Many commercial cycle tracking applications commodify women's health data, flood interfaces with ads, lock basic insights behind costly subscriptions, or upload intimate biometric logs to third-party ad networks.
+I wanted a simple way to understand where I am in my cycle, but most cycle apps ask me to create an account and keep my health data on their servers. I didn't want that for something this personal.
 
-When speaking with a close family member about her daily experience managing menstrual symptoms, three friction points emerged:
-1. **Uncertainty around phase-aligned nutrition:** Not knowing what foods support energy during the luteal phase vs. what eases inflammation during menstruation.
-2. **Generic, cookie-cutter tips:** Reading robotic articles that don't take into account *today's* specific cramps, mood, or dietary restrictions (e.g., vegetarian or Indian food preferences).
-3. **Data privacy anxiety:** Reluctance to share deeply personal health data with proprietary cloud servers or paid AI chatbots.
+So I built CycleCare to run entirely on my own machine. My data stays in a local SQLite file, and the AI suggestions come from a small open-weight model running locally through Ollama, so nothing is sent to a third party.
 
-**CycleCare was built to solve this directly:** a lightweight, aesthetically soothing, completely private companion that runs on the user's personal machine using local open-weight AI and local SQLite storage.
+I built it for myself, and so far it has only been tested by me.
 
 ---
 
 ## ✨ Features
 
-- **Cycle Dashboard & Phase Tracking:**
-  - Displays current cycle day, estimated phase (**Menstrual**, **Follicular**, **Ovulation**, **Luteal**), cycle progress ring, and projected next period date.
-  - Transparent, non-medical phase calculation logic.
-- **Daily Symptom & Mood Check-in:**
-  - One-tap selection of physical symptoms (*cramps, bloating, headache, fatigue, back discomfort, cravings, low energy*).
-  - Mood selector and 1–5 vitality energy rating with optional personal reflection notes.
-  - Local history log of recent check-ins.
-- **Nutritional & Dietary Customization:**
-  - Dietary preferences (*Vegetarian, Non-vegetarian, Vegan, High-protein, Light meals, Indian food, No preference*).
-  - Custom dietary restrictions (e.g. gluten-free, dairy-free) and personal wellness goals.
-- **Open-Source AI Wellness Engine:**
-  - Generates phase-aligned self-care practices, hydration reminders, gentle movement, and sleep wind-down advice.
-  - Delivers 2–3 phase-aligned meal ideas with key ingredients and explanations of nutritional rationale.
-  - Offers an empathetic gentle guidance thought of the day.
-- **Resilient Offline Architecture:**
-  - Works with local Ollama (`gemma2:2b`, `llama3.2`, etc.).
-  - If Ollama is offline or downloading models, CycleCare automatically falls back to its built-in evidence-based wellness knowledge base without crashing.
+- **Cycle dashboard and phase estimate:**
+  - Shows the current cycle day, an estimated phase (**Menstrual**, **Follicular**, **Ovulation**, **Luteal**), a progress ring, and an estimated next period date.
+  - The calculation is simple (last period date + average cycle length) and is easy to read and change in `backend/services/cycle_service.py`. It is a rough estimate, not a medical prediction.
+- **Daily check-in:**
+  - Select symptoms (*cramps, bloating, headache, fatigue, back discomfort, cravings, low energy*).
+  - Pick a mood, rate energy from 1 to 5, and add optional notes.
+  - Recent check-ins are listed from the local database.
+- **Food preferences:**
+  - Preferences (*Vegetarian, Non-vegetarian, Vegan, High-protein, Light meals, Indian food, No preference*).
+  - Free-text dietary restrictions (for example gluten-free or dairy-free) and a wellness goal.
+- **AI wellness suggestions (Gemma via Ollama):**
+  - General self-care, a hydration reminder, a gentle movement idea, and a rest tip.
+  - 2 to 3 meal ideas with key ingredients and a short explanation.
+  - One short piece of guidance based on the cycle phase and the symptoms selected.
+- **Fallback if Ollama is unavailable:**
+  - The app doesn't crash. It shows a generic built-in plan, labelled as coming from the built-in knowledge base rather than the AI model.
+  - This built-in text is not AI-generated and has not been reviewed by any medical professional.
 
 ---
 
 ## 🏗️ Architecture
-
-CycleCare is designed around local execution and privacy:
 
 ```
 [ Frontend: React + Vite ]
@@ -58,24 +53,24 @@ CycleCare is designed around local execution and privacy:
      │                   │
      │ (Local SQL)       │ (HTTP POST localhost:11434)
      ▼                   ▼
-[ SQLite: cyclecare.db ]   [ Local Ollama: Gemma 2B ]
+[ SQLite: cyclecare.db ]   [ Local Ollama: gemma2:2b ]
 ```
 
-1. **Frontend (React + Vite):** A responsive UI built with calming pastel aesthetics, accessible typography, and SVG visualizations.
-2. **Backend (FastAPI):** Python REST service managing cycle calculations, SQLite records, and structured prompt engineering.
-3. **Storage (SQLite):** Embedded, single-file database (`cyclecare.db`) stored strictly on the local filesystem.
-4. **AI Layer (Ollama):** Local open-source model execution. Queries are generated and answered locally without third-party API keys or internet dependencies.
+1. **Frontend (React + Vite):** The UI, with a cycle progress ring and four pages.
+2. **Backend (FastAPI):** Cycle calculations, SQLite reads and writes, and prompt building.
+3. **Storage (SQLite):** A single local file, `cyclecare.db`, which is excluded from git.
+4. **AI layer (Ollama):** The backend sends a structured prompt to Ollama's `/api/generate` endpoint, asks for JSON, and validates the response before showing it.
 
 ---
 
-## 🧠 Why Open-Source AI?
+## 🧠 Why Open-Weight AI?
 
-Using a local, open-source model (such as Google DeepMind's **Gemma 2B** via **Ollama**) provides distinct advantages for personal health tools:
+I used Gemma (`gemma2:2b`), an open-weight model, through Ollama. For a personal health tool that gave me:
 
-1. **True Intimate Privacy:** Menstrual cycle data, physical symptoms, and mental wellbeing notes never leave the user's laptop.
-2. **No Cost or Subscription Paywalls:** Eliminates expensive API tokens and recurring subscriptions.
-3. **No Vendor Lock-In:** The user can swap between open-weight models (`gemma2:2b`, `llama3.2`, `mistral`) simply by setting an environment variable.
-4. **Transparency & Auditability:** Prompts, system rules, and schemas are visible and fully controllable in the source code.
+1. **Privacy:** The prompts, which include cycle and symptom data, are processed on my laptop and are not sent to a third-party API.
+2. **No cost:** After the one-time model download there are no API fees or subscriptions.
+3. **Swappable models:** The model name is a setting in `.env`, so a different model can be tried without code changes. Only `gemma2:2b` has been tested so far.
+4. **Visible prompts:** The system prompt and output schema are in the source code and can be read and changed.
 
 ---
 
@@ -83,27 +78,27 @@ Using a local, open-source model (such as Google DeepMind's **Gemma 2B** via **O
 
 ### Prerequisites
 - **Python 3.10+**
-- **Node.js 18+ & npm**
-- **Ollama** ([Download from ollama.com](https://ollama.com))
+- **Node.js 18+ and npm**
+- **Ollama** ([download from ollama.com](https://ollama.com))
 
 ---
 
-### Step 1: Install Ollama & Pull the Model
+### Step 1: Install Ollama and pull the model
 
-1. Download and install Ollama from [ollama.com](https://ollama.com).
-2. Pull the recommended lightweight open model:
+1. Install Ollama from [ollama.com](https://ollama.com).
+2. Pull the model:
    ```bash
    ollama pull gemma2:2b
    ```
-3. Ensure Ollama is running:
+3. Make sure Ollama is running:
    ```bash
    ollama serve
    ```
-*(Note: If Ollama is not running, CycleCare will smoothly activate its built-in offline wellness knowledge base).*
+*(If Ollama is not running, CycleCare shows its generic built-in plan instead of AI suggestions, and labels it as such.)*
 
 ---
 
-### Step 2: Install Backend Dependencies
+### Step 2: Install backend dependencies
 
 1. Open a terminal in the project root:
    ```bash
@@ -120,14 +115,14 @@ Using a local, open-source model (such as Google DeepMind's **Gemma 2B** via **O
      python3 -m venv venv
      source venv/bin/activate
      ```
-3. Install backend dependencies:
+3. Install the dependencies:
    ```bash
    pip install -r backend/requirements.txt
    ```
 
 ---
 
-### Step 3: Install Frontend Dependencies
+### Step 3: Install frontend dependencies
 
 In a separate terminal:
 ```bash
@@ -137,58 +132,66 @@ npm install
 
 ---
 
-### Step 4: Run the Application
+### Step 4: Run the application
 
-#### 1. Start the FastAPI Backend:
+#### 1. Start the FastAPI backend
 ```bash
-# From cyclecare/ root with virtual environment activated:
+# From the cyclecare/ root, with the virtual environment activated:
 python backend/main.py
 ```
-*Backend runs at:* `http://127.0.0.1:8000`  
-*Interactive Swagger docs:* `http://127.0.0.1:8000/docs`
+*Backend:* `http://127.0.0.1:8000`
+*API docs:* `http://127.0.0.1:8000/docs`
 
-#### 2. Start the React Frontend:
+#### 2. Start the React frontend
 ```bash
 # In cyclecare/frontend:
 npm run dev
 ```
-*Frontend runs at:* `http://localhost:5173`
+*Frontend:* `http://localhost:5173`
 
-Open [http://localhost:5173](http://localhost:5173) in your browser!
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
 ## 📱 User Flow
 
-1. **Cycle Setup (Profile Tab):** Enter the start date of your last period and your typical cycle length (e.g. 28 days).
-2. **Dietary Preferences (Profile Tab):** Choose your food preferences (e.g. *Vegetarian*, *Indian food*) and any restrictions (e.g. *gluten-free*).
-3. **Daily Check-in (Check-in Tab):** Select today's symptoms (*cramps, fatigue, bloating*), select your current mood and energy level, and save your daily entry.
-4. **View Cycle Dashboard (Dashboard Tab):** Check your current phase, cycle day progress ring, and days until your next period.
-5. **Receive AI Wellness Plan (AI Wellness Tab):** Click **"Generate Suggestions"** to receive AI-crafted self-care, hydration, rest tips, and 2–3 phase-aligned meal recipes.
+1. **Profile:** Enter the start date of your last period and your typical cycle length.
+2. **Preferences (Profile page):** Choose food preferences and any restrictions.
+3. **Check-in:** Select today's symptoms, a mood, and an energy level, then save.
+4. **Dashboard:** See your estimated phase, cycle day, and estimated next period date.
+5. **AI Wellness:** Click **Generate Suggestions** to get self-care, hydration, rest, and meal ideas. Each result shows whether it came from the local model or the built-in fallback.
 
 ---
 
-## 🛡️ Medical Safety & Ethical Boundaries
+## 🛡️ Safety
 
-> **Important Disclaimer:**  
-> **CycleCare is a wellness companion and is not intended to diagnose, treat, cure, or prevent medical conditions. AI-generated suggestions are general lifestyle and nutritional wellness information and should never replace professional medical advice, diagnosis, or care from a qualified healthcare practitioner.**
+> **CycleCare is a wellness companion and is not intended to diagnose, treat, or prevent medical conditions. AI-generated suggestions are general wellness information and should not replace professional medical advice.**
 
-CycleCare incorporates hard-coded ethical safeguards:
-- Does **not** diagnose medical conditions (e.g. endometriosis, PCOS, PMDD).
-- Does **not** prescribe or recommend pharmaceuticals or medicinal dosages.
-- Refers users with severe or abnormal pain to licensed medical doctors.
+- The system prompt instructs the model not to diagnose conditions and not to suggest medication or doses. A small model can still make mistakes, so treat every suggestion as general information.
+- If you have severe, unusual, or worrying symptoms, talk to a healthcare professional.
+- Phase estimates are rough and unreliable for irregular cycles. Do not use them to plan or avoid pregnancy.
+
+---
+
+## ⚠️ Limitations
+
+- Built for one user and tested only by me.
+- Needs a laptop running Ollama, so it can't easily be deployed for others to try.
+- A 2B model can be slow, generic, or inconsistent. Meal ideas are general suggestions, not nutritional advice.
+- Data is stored locally and **unencrypted** in SQLite, so anyone with access to the computer could read it. Keep the backend bound to `127.0.0.1`.
+- There is no data export or delete button yet.
+- Free-text notes are included in the prompt sent to the local model.
 
 ---
 
 ## 🔮 Future Improvements
 
-- Historical cycle length variance tracking and standard deviation estimation.
-- Export / import of local SQLite data as encrypted JSON backup.
-- Native desktop wrapper (e.g. Electron or Tauri) for a single double-clickable offline app.
-- Customizable reminder notifications for hydration and rest breaks.
+- Learn the real cycle length from past entries instead of a fixed average.
+- Export and delete local data from the app.
+- Compare outputs from different open-weight models.
 
 ---
 
 ## 📄 License
 
-MIT License. Created with ❤️ for family, friends, and the open-source community.
+MIT License. See the `LICENSE` file.
